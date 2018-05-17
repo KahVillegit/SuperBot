@@ -1,0 +1,86 @@
+{
+  "_args": [
+    [
+      {
+        "raw": "ingest@git+ssh://git@git.corp.adobe.com:CCX/Ingest.git#v1.0.1",
+        "scope": null,
+        "escapedName": "ingest",
+        "name": "ingest",
+        "rawSpec": "git+ssh://git@git.corp.adobe.com:CCX/Ingest.git#v1.0.1",
+        "spec": "ssh://git@git.corp.adobe.com:CCX/Ingest.git#v1.0.1",
+        "type": "git"
+      },
+      "c:\\Users\\labuser\\Jenkins\\workspace\\CCLibrariesThorServiceWindows"
+    ]
+  ],
+  "_from": "git+ssh://git@git.corp.adobe.com:CCX/Ingest.git#v1.0.1",
+  "_id": "ingest@1.0.1",
+  "_inCache": true,
+  "_location": "/ingest",
+  "_phantomChildren": {},
+  "_requested": {
+    "raw": "ingest@git+ssh://git@git.corp.adobe.com:CCX/Ingest.git#v1.0.1",
+    "scope": null,
+    "escapedName": "ingest",
+    "name": "ingest",
+    "rawSpec": "git+ssh://git@git.corp.adobe.com:CCX/Ingest.git#v1.0.1",
+    "spec": "ssh://git@git.corp.adobe.com:CCX/Ingest.git#v1.0.1",
+    "type": "git"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "git+ssh://git@git.corp.adobe.com:CCX/Ingest.git#01c60c148a26abcd71ba700a089f4043c2589e45",
+  "_shasum": "c522ccb3fca44f9d222862a8b85d51f90d8f2f61",
+  "_shrinkwrap": null,
+  "_spec": "ingest@git+ssh://git@git.corp.adobe.com:CCX/Ingest.git#v1.0.1",
+  "_where": "c:\\Users\\labuser\\Jenkins\\workspace\\CCLibrariesThorServiceWindows",
+  "author": "",
+  "dependencies": {
+    "amdefine": "1.0.0"
+  },
+  "description": "Ingest Javascript Lib",
+  "devDependencies": {
+    "almond": "0.3.1",
+    "chai": "^3.4.1",
+    "grunt": "0.4.2",
+    "grunt-contrib-clean": "0.6.0",
+    "grunt-contrib-requirejs": "0.4.4",
+    "grunt-linter": "0.3.2",
+    "grunt-mocha": "0.4.15",
+    "istanbul": "0.4.2",
+    "jasmine-node": "1.11.0",
+    "jslint": "0.9.6",
+    "matchdep": "0.1.2",
+    "mkdirp": "0.3.5",
+    "mocha": "2.3.3",
+    "mockery": "1.4.0",
+    "moment": "2.14.1",
+    "mustache": "1.1.0",
+    "nock": "0.48.2",
+    "node-uglifier": "0.3.3",
+    "sinon": "1.17.3"
+  },
+  "engines": {
+    "node": ">=4.2.0"
+  },
+  "gitHead": "01c60c148a26abcd71ba700a089f4043c2589e45",
+  "keywords": [
+    "Ingest"
+  ],
+  "license": "",
+  "main": "ingest-js.min.js",
+  "name": "ingest",
+  "optionalDependencies": {},
+  "private": true,
+  "readme": "# Ingest\n\nJavaScript library for sending analytics events to Ingest. Works in both the browser and node.js.\n\n## Table of Contents\n\n 1. [Integration](#integration)\n 1. [Development](#development)\n     1. [Environment Setup](#environment-setup)\n     1. [Installing Dependencies](#installing-dependencies)\n 1. [Useful Commands](#useful-commands)\n\n## Integration\n\nIntegration in nodejs based apps\n\n    GLOBAL.nodeRequire = require;\n    var IngestAPI = require('ingest');\n\n    ...\nIntegration in browser based apps\n\n    <head>\n        <script src='ingest/lib/ingest-api.min.js'></script>\n    </head>\n\n    ...\n\nSample Code\n\n    var dependencies = {\n        getAccessToken: function (callback) { // required\n            yourFunctionGetAccessToken(function (err, token) {\n                callback(err, token);\n            });\n        },\n        clearAccessToken: function () { // optional\n            // clear your cached access token since it's expired.\n        },\n        getAgent: function (url, callback) { // optional\n            callback(null, {\n                agent: yourProxyAgent\n            });\n        },\n        log: function (msg) { // optional\n            // Log the message in your logs\n        }\n    };\n    var options = {\n        ENVIRONMENT:                  'prod',                   // 'prod', 'stage', or 'dev' (default is 'prod')\n        ANALYTICS_API_KEY:            'YOUR_API_KEY',           // Required\n        ANALYTICS_PROJECT:            'YOUR_PROJECT',           // Required\n        ANALYTICS_X_PRODUCT:          'YOUR_PRODUCT',           // Required\n        ANALYTICS_X_PRODUCT_LOCATION: 'YOUR_PRODUCT_LOCATION',  // Optional - specify a location in the product, like a panel/extension\n        ANALYTICS_MAX_QUEUED_EVENTS:  50,                       // Optional - default is max queue of 50 events\n        ANALYTICS_DEBOUNCE:           10,                       // Optional - default is to send no faster than every 10 seconds\n        ANALYTICS_USER_REGION:        'UNKNOWN',                // Optional - set the x-user-region header (default is 'UNKNOWN')\n        ANALYTICS_INGEST_TYPE:        'dunamis',                // Optional - only change this if you know what you're doing\n        TIMESTAMP_PROPERTY_NAME:      'event.dts_end'           // Optional - only change this if you know what you're doing (override SDM)\n    };\n\n    var ingest = IngestAPI.createInstance(dependencies, options);\n\n    // By default, analytics is disabled - call this to enable it (or disable it again, based on user settings)\n    ingest.enable(true);\n\n    // Send an event\n    ingest.postEvent(payload, function (success, numOfSentEvents) {\n        ...\n    });\n\n    // Flush any queued events\n    ingest.flush(true); // Specify true, to send immediately\n\n## Breaking Changes from Version 0.x to Version 1.x\n\nPrior to version 1.0, the API had the following differences:\n\n* The Ingest API was a singleton, meaning that you could only have one instance of it (with a single configuration). Now, instead of calling `Ingest.init()`, you call `Ingest.createInstance()` and call the APIs like `postEvent` on the instance this returns.\n* Options used to be passed in as a dependency `getOptions`. Now, they're passed in statically in `Ingest.createInstance()`.\n* Enabling analytics used to be an option. Now, instead, it's an API call `ingest.enable(true)`.\n* To determine when analytics are sent, there used to be an `addEventListener` API. This was problematic because it could trigger for a different event than the one you queued to send. Instead, we now just allow the `postEvent` and `flush` APIs to take a callback, which gets called when the event is sent (or failed to be sent).\n* There used to be an override for the `event.dts_end` property for the API Key `CCXInAppWelcome`. This is now an option rather than being baked in the API - if you were using that API key, you should pass in `TIMESTAMP_PROPERTY_NAME: 'dts'` as an option.\n\n## Development\n\n### Environment Setup\n\n```sh\n# Install NodeJS (4.2)\nbrew install node\n\n# Install Grunt (latest)\nnpm install grunt -g\n```\n\n### Installing Dependencies\n\n```sh\n# From Repository's Root Directory\nnpm install\n```\n\n## Useful Commands\n\nTo run all code through the linter (JSLint):\n\n\tgrunt linter\n\nTo run the unit tests (written in Jasmine), and see a code coverage report:\n\n\tgrunt test\n\nTo generate ingest-api.min.js\n\n\tgrunt release\n",
+  "readmeFilename": "README.md",
+  "repository": {
+    "type": "git",
+    "url": "git@git.corp.adobe.com:CCX/Ingest.git"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "version": "1.0.1"
+}
